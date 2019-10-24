@@ -1,77 +1,132 @@
-function copyDoc() {
-    var srcDoc = DocumentApp.openById('1020oQGoIEHK8yguoR-Nz4AQGvlgz1FZkdLoXUGjqRD8');
-    var tarDoc = DocumentApp.getActiveDocument();
-    var srcDocTotal = srcDoc.getNumChildren();
-    var tarDocBody = tarDoc.getBody();
-    //tarDocBody.clear();
-    tarDocBody.appendParagraph('Last Updated ' + Date()).setFontSize(8).appendHorizontalRule();
-    for (var x = 0; x < srcDocTotal; x++) {
-        var el = srcDoc.getChild(x).copy();
-        var elType = el.getType();
-        if (elType == DocumentApp.ElementType.PARAGRAPH) {
-            tarDocBody.appendParagraph(el);
-        }
-        else if (elType == DocumentApp.ElementType.LIST_ITEM) {
-            tarDocBody.appendListItem(el);
-        }
-        else if (elType == DocumentApp.ElementType.TABLE) {
-            tarDocBody.appendTable(el);
-        }
-        Logger.log(elType);
-    }
-}
-
 function onOpen(){
-  DocumentApp.getUi().createMenu('Mymenu')
-  .addItem('call function1', 'copyDoc')
-  .addItem('Alert', 'alertUi')
+  //Logger.log('Hello');
+  DocumentApp.getUi()
+  .createMenu('Advanced')
+  .addItem('one', 'myFun1')
+  .addItem('two', 'myFun2')
   .addSeparator()
-  .addItem('Html', 'htmlOutput')
-  .addItem('Fun', 'fun')
-  .addItem('Translate', 'translate')
+  .addItem('three', 'myFun3')
+  .addItem('four', 'myFun4')
+  .addItem('five', 'myFun5')
+  .addItem('six', 'myFun6')
+  .addItem('seven', 'myFun7')
+  .addItem('eight', 'myFun8')
+  .addItem('nine', 'myFun9')
+  .addItem('ten', 'myFun10')
   .addToUi();
 }
-
-function alertUi(){
+function myFun1(){
   var ui = DocumentApp.getUi();
-  //ui.alert('Alert!!!');
-  var result = ui.alert('Warning', 'Do you want to continue', ui.ButtonSet.YES_NO_CANCEL);
-  ui.alert('You chose : ' + result);
-  Logger.log(result);
+  var result = ui.alert('QUESTION','Are you logged in?',ui.ButtonSet.YES_NO_CANCEL);
+  ui.alert('You responded with '+ result);
+}
+function myFun2(){
+  var ui = DocumentApp.getUi();
+  var result = Session.getActiveUser().getEmail();
+  ui.alert('Your email '+ result);
+}
+function myFun3(){
+  var ui = DocumentApp.getUi();
+  var response = ui.prompt('Getting to know you', 'May I know your name?', ui.ButtonSet.YES_NO);
+  ui.alert('Your name '+ response.getResponseText());
+}
+function myFun4(){
+  var ui = DocumentApp.getUi();
+  var result = Session.getActiveUserLocale();
+  var resultTZ = Session.getScriptTimeZone();
+  ui.alert('Your locale '+ result + ' ' + resultTZ);
+}
+function myFun5(){
+  var htmlOutput = HtmlService
+     .createHtmlOutput('<h1>Hello</h1><br>world')
+     .setWidth(650)
+     .setHeight(400);
+ DocumentApp.getUi().showModalDialog(htmlOutput, 'Title Whatever');
+}
+function myFun6(){
+  var htmlOutput = HtmlService
+     .createHtmlOutputFromFile('modal')
+     .setWidth(650)
+     .setHeight(400);
+ DocumentApp.getUi().showModalDialog(htmlOutput, 'Title Whatever');
+}
+function myFun7(){
+  var cursor = DocumentApp.getActiveDocument().getCursor();
+  cursor.insertText(' ' +Date()+' ' );
+}
+function myFun8(){
+  var doc = DocumentApp.getActiveDocument().getId();
+  var ui = DocumentApp.getUi();
+  ui.alert('Doc ID '+ doc);
+}
+function myFun9(){
+  var selection = DocumentApp.getActiveDocument().getSelection();
+  var output;
+  if(selection){
+  var el = selection.getRangeElements();
+    for(var x=0;x<el.length;x++){
+      if(el[x].getElement().editAsText){
+        var holder = el[x].getElement().editAsText();
+        output += holder.getText();
+        if(el[x].isPartial()){
+          holder.setBold(el[x].getStartOffset(),el[x].getEndOffsetInclusive(),true);
+        }else{
+          holder.setBold(true);
+        }
+      }
+    }
+  DocumentApp.getUi().alert('Selected Text '+output);
+  }
+}
+function myFun10(){
+  var selection = DocumentApp.getActiveDocument().getSelection();
+  var output = 'TRANSLATION:';
+  if(selection){
+  var el = selection.getRangeElements();
+    for(var x=0;x<el.length;x++){
+      if(el[x].getElement().editAsText){
+        var holder = el[x].getElement().editAsText();
+        output += holder.getText();
+      }
+    }
+    
+  var spanish = LanguageApp.translate(output, 'en', 'es');
+    DocumentApp.getUi().alert('Spanish : '+spanish);
+  }
+}
+
+function exchange(){
+  var doc = DocumentApp.getActiveDocument();
+  var body = doc.getBody();
+  var ui = DocumentApp.getUi();
+  var html = HtmlService.createHtmlOutput();
+  html.setContent('<div class="exchange-rate-module"><div class="section"><div class="section-content type">USD:</div><div class="section-content rate">24.800&nbsp;/&nbsp;25.189</div></div><div class="section"><div class="section-content type">EUR:</div><div class="section-content rate">27.45&nbsp;/&nbsp;27.93</div></div></div>')
+  ui.showModalDialog(html, 'Example');
+  var place = body;
+  Logger.log(place);
   
 }
 
-function htmlOutput() {
+function findcontent(){
+  var body = DocumentApp.getActiveDocument().getBody();
   var ui = DocumentApp.getUi();
-  var htmloutput = HtmlService.createHtmlOutput('<p>Hello,</p>')
-  .setWidth(250)
-  .setHeight(150)
-  ui.showModalDialog(htmloutput, 'Example');
-}
-
-function fun(){
-  var doc = DocumentApp.getActiveDocument();
-  var cursor = doc.getCursor();
-  cursor.insertText(Date());
-}
-
-function translate(){
-  var doc =  DocumentApp.getActiveDocument();
-  var ui = DocumentApp.getUi();
-  var selection = doc.getSelection();
-  var output = '';
-  if (selection){
-    var el = selection.getRangeElements();
-    
-    for (var x=0;x<el.length;x++){
-      if (el[x].getElement().editAsText()){
-        //Logger.log(el[x].getElement().asText().getText());
-        var selStart = el[x].getStartOffset();
-        var selEnd = el[x].getEndOffsetInclusive();
-        var holder = el[x].getElement().asText().getText();
-        output += holder;
-      }
+  var response = ui.prompt('Find:');
+  if (response.getResponseText()){
+  var finderContent = body.findText(response.getResponseText());
+    Logger.log(finderContent);
+    while (finderContent  != null){
+      var outputContent = finderContent.getElement().editAsText();
+      Logger.log(outputContent.getText());
+      var startPos = finderContent.getStartOffset();
+      var endPos = finderContent.getEndOffsetInclusive();
+      outputContent.setForegroundColor(startPos,endPos,'#0000FF');
+      finderContent = body.findText(response.getResponseText(), finderContent);
     }
-    ui.alert(LanguageApp.translate(output, 'en', 'uk'));
   }
 }
+//function myFunction() {
+//  var doc = DocumentApp.getActiveDocument();
+//  Logger.log(doc.getId());
+//  Logger.log(doc.getUrl());
+//  Logger.log(doc.getName());
+//}
